@@ -1,5 +1,6 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.Linq;
 
 namespace AocIntComputer.Runtime {
     
@@ -61,11 +62,12 @@ namespace AocIntComputer.Runtime {
 
         private IntComputerMemory _mem;
 
-        private bool _halt, _finished;
+        private bool _halt, _finished, _debug;
         private long _pc = 0, _relativeBase = 0;
 
-        public BaseIntComputer(List<long> program) {
+        public BaseIntComputer(IEnumerable<long> program, bool debug = false) {
             _mem = new IntComputerMemory(program.ToArray());
+            _debug = debug;
         }
 
         public bool IsFinished => _finished;
@@ -89,6 +91,14 @@ namespace AocIntComputer.Runtime {
             while (true) {
                 if (_halt) {
                     goto end;
+                }
+
+                if (_debug) {
+                    Console.WriteLine($"[{string.Join(",", _mem.ToArray)}]");
+                    Console.WriteLine($"PC {_pc}");
+                    Console.WriteLine($"NextOp {PeekOpCode()}");
+                    Console.WriteLine("Press enter to continue");
+                    Console.ReadLine();
                 }
 
                 ParameterMode[] modes = {ParameterMode.Position, ParameterMode.Position, ParameterMode.Position};
@@ -143,6 +153,10 @@ namespace AocIntComputer.Runtime {
 
                         long storeTo = NextAddrWriteTo();
 
+                        if (_debug) {
+                            Console.WriteLine($"WRITE ({a} + {b}) => {a + b} TO ADDR {storeTo}");
+                        }
+
                         _mem[storeTo] = a + b;
                         continue;
                     }
@@ -153,6 +167,10 @@ namespace AocIntComputer.Runtime {
 
                         long storeTo = NextAddrWriteTo();
 
+                        if (_debug) {
+                            Console.WriteLine($"WRITE ({a} * {b}) => {a * b} TO ADDR {storeTo}");
+                        }
+
                         _mem[storeTo] = a * b;
                         continue;
                     }
@@ -160,6 +178,10 @@ namespace AocIntComputer.Runtime {
                     case OpCodeInput: {
                         long storeTo = NextAddrWriteTo();
                         long input = Input();
+
+                        if (_debug) {
+                            Console.WriteLine($"WRITE INPUT \"{input}\" TO ADDR {storeTo}");
+                        }
 
                         _mem[storeTo] = input;
                         continue;
@@ -191,6 +213,11 @@ namespace AocIntComputer.Runtime {
                         long jumpTo = NextParameter();
 
                         if (check != 0) {
+
+                            if (_debug) {
+                                Console.WriteLine($"JUMP TO ADDR {jumpTo} BECAUSE {check} IS TRUE");
+                            }
+                            
                             _pc = jumpTo;
                         }
 
@@ -202,6 +229,11 @@ namespace AocIntComputer.Runtime {
                         long jumpTo = NextParameter();
 
                         if (check == 0) {
+
+                            if (_debug) {
+                                Console.WriteLine($"JUMP TO ADDR {jumpTo} BECAUSE {check} IS FALSE");
+                            }
+                            
                             _pc = jumpTo;
                         }
 
@@ -212,6 +244,10 @@ namespace AocIntComputer.Runtime {
                         long a = NextParameter();
                         long b = NextParameter();
                         long writeTo = NextAddrWriteTo();
+
+                        if (_debug) {
+                            Console.WriteLine($"WRITE ({a} < {b}) => {(a < b ? 1 : 0)} TO ADDR {writeTo}");
+                        }
                         
                         if (a < b) {
                             _mem[writeTo] = 1;
@@ -227,6 +263,10 @@ namespace AocIntComputer.Runtime {
                         long a = NextParameter();
                         long b = NextParameter();
                         long writeTo = NextAddrWriteTo();
+
+                        if (_debug) {
+                            Console.WriteLine($"WRITE ({a} == {b}) => {(a == b ? 1 : 0)} TO ADDR {writeTo}");
+                        }
 
                         if (a == b) {
                             _mem[writeTo] = 1;

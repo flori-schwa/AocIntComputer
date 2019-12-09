@@ -1,6 +1,5 @@
 using System;
 using System.Linq;
-using System.Runtime.CompilerServices;
 using AocIntComputer.Compiler.Tokens;
 using AocIntComputer.Runtime;
 
@@ -42,13 +41,13 @@ namespace AocIntComputer.Compiler {
         public sealed override TokenType TokenType => TokenType.Instruction;
 
         public abstract string TokenValue { get; }
-        
+
         public abstract int RequiredParameters { get; }
 
         public abstract int SizeLongs { get; }
 
         public int SizeBytes => SizeLongs * sizeof(long);
-        
+
         public abstract long[] Compile(params ParameterToken[] parameters);
 
         protected static long RequireNotImmediateMode(int index, params ParameterToken[] parameters) {
@@ -62,19 +61,19 @@ namespace AocIntComputer.Compiler {
         protected long EncodeParameterModes(params ParameterToken[] parameters) {
             long modes = 0;
 
-            for (int i = 0; i < RequiredParameters; i++) {
+            for (int i = 0; i < parameters.Length; i++) {
                 switch (parameters[i].Value.ParameterMode) {
                     case ParameterMode.Position: {
                         break;
                     }
 
                     case ParameterMode.Immediate: {
-                        modes += (long) Math.Pow(10, (RequiredParameters + 1) - i);
+                        modes += (long) Math.Pow(10, RequiredParameters + 1 - (parameters.Length - 1 - i));
                         break;
                     }
 
                     case ParameterMode.Relative: {
-                        modes += 2 * (long) Math.Pow(10, (RequiredParameters + 1) - i);
+                        modes += 2 * (long) Math.Pow(10, RequiredParameters + 1 - (parameters.Length - 1 - i));
                         break;
                     }
 
@@ -96,10 +95,11 @@ namespace AocIntComputer.Compiler {
         public ParameterToken(Parameter value) {
             Value = value;
         }
+
+        public override string ToString() => Value.ToString();
     }
 
     public class Parameter {
-
         public static Parameter Parse(string parameter) {
             /*
              * Hex prefix '0x'
@@ -139,9 +139,27 @@ namespace AocIntComputer.Compiler {
                 parameter = parameter.Substring(1); // Remove prefix
             }
 
-            long value = Convert.ToInt64(parameter);
+            long value = parameter.ParseLongDecimalOrHex();
 
             return new Parameter(value, mode);
+        }
+
+        public override string ToString() {
+            string s = "";
+
+            switch (ParameterMode) {
+                case ParameterMode.Immediate: {
+                    s += "$";
+                    break;
+                }
+
+                case ParameterMode.Relative: {
+                    s += "R";
+                    break;
+                }
+            }
+
+            return s + Value;
         }
 
         public Parameter(long value, ParameterMode parameterMode) {
@@ -163,17 +181,26 @@ namespace AocIntComputer.Compiler {
 
             InstructionToken instructionToken =
                 BaseToken.Instructions.FirstOrDefault(t => t.TokenValue.Equals(parts[0]));
+            ParameterToken[] parameterTokens;
 
             if (instructionToken == null) {
-                throw new CompileException($"Unknown instruction \"{parts[0]}\"");
-            }
-            
-            ParameterToken[] parameterTokens = new ParameterToken[parts.Length - 1];
+                // Data line
 
-            for (int i = 1; i < parts.Length; i++) {
-                parameterTokens[i - 1] = new ParameterToken(Parameter.Parse(parts[i]));
+                parameterTokens = new ParameterToken[parts.Length];
+
+                for (int i = 0; i < parts.Length; i++) {
+                    parameterTokens[i] =
+                        new ParameterToken(new Parameter(parts[i].ParseLongDecimalOrHex(), ParameterMode.Position));
+                }
             }
-            
+            else {
+                parameterTokens = new ParameterToken[parts.Length - 1];
+
+                for (int i = 1; i < parts.Length; i++) {
+                    parameterTokens[i - 1] = new ParameterToken(Parameter.Parse(parts[i]));
+                }
+            }
+
             return new Statement(instructionToken, parameterTokens);
         }
 
@@ -187,7 +214,11 @@ namespace AocIntComputer.Compiler {
         public ParameterToken[] Parameters => _parameters;
 
         public long[] Compile() {
-            return Instruction.Compile(Parameters);
+            if (Instruction != null) {
+                return Instruction.Compile(Parameters);
+            }
+
+            return Parameters.Select(p => p.Value.Value).ToArray();
         }
     }
 
@@ -200,17 +231,22 @@ namespace AocIntComputer.Compiler {
 
         public long[] Compile() {
             string[] lines = _program.Split('\n');
-            
+
             LongWriter longWriter = new LongWriter();
 
             for (int i = 0; i < lines.Length; i++) {
                 string line = lines[i].Trim();
-                line = line.Substring(0, line.Length - line.IndexOf('#')).Trim();
+
+                int hashIndex = line.IndexOf('#');
+
+                if (hashIndex >= 0) {
+                    line = line.Substring(0, hashIndex).Trim();
+                }
 
                 if (line.Length == 0) {
                     continue;
                 }
-                
+
                 longWriter.Write(Statement.Parse(line).Compile());
             }
 

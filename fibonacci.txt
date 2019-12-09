@@ -1,0 +1,29 @@
+# This program prints the fibonacci sequence
+
+IN 0                # input max value
+JMPT $1 $0xa        # Jump to start
+
+# Variable storage
+
+0                   # a             (ADDR 5)
+1                   # b             (ADDR 6)
+-1                  # result        (ADDR 7)
+-1                  # tmp storage   (ADDR 8)
+-1                  # max           (ADDR 9)
+
+# Loop start
+
+ADD 5 6 7           # Add a + b, len 4
+OUT 7               # Output the result, len 2
+ADD 7 $0 6          # Set b to the result of a + b, len 4
+ADD 5 6 7           # Add a + b, len 4
+
+# Swap a and b
+
+ADD 5 $0 8          # Store a to tmp
+ADD 6 $0 5          # Store b to a
+ADD 8 $0 6          # Store tmp to b
+
+LT 7 0 8            # Check if result less than max value
+JMPT 8 $0xa         # Loop back to beginning
+END

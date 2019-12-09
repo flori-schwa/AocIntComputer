@@ -4,6 +4,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AocIntComputer", "AocIntCom
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Runtime", "Runtime\Runtime.csproj", "{94C9418A-A793-4BD9-9BD9-2CE06B7253BB}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -18,5 +20,9 @@ Global
 		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Release|Any CPU.Build.0 = Release|Any CPU
+		{94C9418A-A793-4BD9-9BD9-2CE06B7253BB}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{94C9418A-A793-4BD9-9BD9-2CE06B7253BB}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{94C9418A-A793-4BD9-9BD9-2CE06B7253BB}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{94C9418A-A793-4BD9-9BD9-2CE06B7253BB}.Release|Any CPU.Build.0 = Release|Any CPU
 	EndGlobalSection
 EndGlobal

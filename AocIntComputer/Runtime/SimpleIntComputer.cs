@@ -3,10 +3,10 @@ using System.Collections.Generic;
 
 namespace AocIntComputer.Runtime {
     public class SimpleIntComputer : BaseIntComputer {
-        public SimpleIntComputer(List<long> program) : base(program) { }
+        public SimpleIntComputer(IEnumerable<long> program, bool debug = false) : base(program, debug) { }
 
         protected override long Input() {
-            Console.WriteLine("IN: ");
+            Console.Write("> ");
             return long.Parse(Console.ReadLine());
         }
 
