@@ -1,4 +1,5 @@
 # This program prints the fibonacci sequence
+# It will first ask for a single input, the upper bound of the loop
 
 IN 0                # input max value
 JMPT $1 $0xa        # Jump to start
