@@ -1,0 +1,30 @@
+# This program prints the fibonacci sequence
+# It will first ask for a single input, the upper bound of the loop
+
+IN 0                # input max value
+ADJR $7				# Adjust the relative base
+JMPT $1 $0xC        # Jump to start
+
+# Variable storage
+
+0                   # a
+1                   # b
+-1                  # result
+-1                  # tmp storage
+-1                  # control variable
+
+# Loop start
+
+ADD R0 R1 R2		# Add a + b store to result
+OUT R2              # Output the result
+ADD R2 $0 R1        # Set b to the result of a + b
+
+# Swap a and b
+
+ADD R0 $0 R3        # Store a to tmp
+ADD R1 $0 R0        # Store b to a
+ADD R3 $0 R1        # Store tmp to b
+
+LT R2 0 R4          # Check if result less than max value
+JMPT R4 $0xC        # Loop back to beginning
+END

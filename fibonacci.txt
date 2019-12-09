@@ -14,10 +14,9 @@ JMPT $1 $0xa        # Jump to start
 
 # Loop start
 
-ADD 5 6 7           # Add a + b, len 4
-OUT 7               # Output the result, len 2
-ADD 7 $0 6          # Set b to the result of a + b, len 4
-ADD 5 6 7           # Add a + b, len 4
+ADD 5 6 7           # Add a + b
+OUT 7               # Output the result
+ADD 7 $0 6          # Set b to the result of a + b
 
 # Swap a and b
 

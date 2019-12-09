@@ -281,6 +281,10 @@ namespace AocIntComputer.Runtime {
                     case OpCodeAdjustRelativeBase: {
                         long modBase = NextParameter();
 
+                        if (_debug) {
+                            Console.WriteLine($"ADJUST RELATIVE BASE BY {modBase} => {modBase + _relativeBase}");
+                        }
+
                         _relativeBase += modBase;
                         continue;
                     }
