@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using System.Linq;
 using AocIntComputer.Compiler.Tokens;
 using AocIntComputer.Runtime;
@@ -100,7 +101,7 @@ namespace AocIntComputer.Compiler {
     }
 
     public class Parameter {
-        public static Parameter Parse(string parameter) {
+        public static Parameter Parse(string parameter, IDictionary<string, long> variables) {
             /*
              * Hex prefix '0x'
              *
@@ -109,6 +110,10 @@ namespace AocIntComputer.Compiler {
              * relative mode: R
              * 
              */
+
+            if (variables.ContainsKey(parameter)) {
+                return new Parameter(variables[parameter], ParameterMode.Position);
+            }
 
             char prefix = parameter[0];
 
@@ -139,9 +144,7 @@ namespace AocIntComputer.Compiler {
                 parameter = parameter.Substring(1); // Remove prefix
             }
 
-            long value = parameter.ParseLongDecimalOrHex();
-
-            return new Parameter(value, mode);
+            return new Parameter(parameter.ParseLongDecimalOrHex(), mode);
         }
 
         public override string ToString() {
@@ -176,7 +179,11 @@ namespace AocIntComputer.Compiler {
         private InstructionToken _instruction;
         private ParameterToken[] _parameters;
 
-        public static Statement Parse(string line) {
+        private static bool IsValidVariableName(string name) {
+            return name.All(c => c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
+        }
+
+        public static Statement Parse(string line, long index, IDictionary<string, long> variables) {
             string[] parts = line.Trim().Split(' ');
 
             InstructionToken instructionToken =
@@ -184,7 +191,26 @@ namespace AocIntComputer.Compiler {
             ParameterToken[] parameterTokens;
 
             if (instructionToken == null) {
-                // Data line
+                // Data line or variable declaration
+                
+                // Variable declaration:
+                // var name := value
+
+                if (parts.Length == 3 && "var".Equals(parts[0])) {
+                    string varName = parts[1];
+
+                    if (variables.ContainsKey(varName)) {
+                        throw new CompileException($"A variable with the name \"{varName}\" already exists!");
+                    }
+
+                    if (!IsValidVariableName(varName)) {
+                        throw new CompileException($"Illegal variable name \"{varName}\"");
+                    }
+
+                    variables[varName] = index; // Store the variable index
+
+                    parts = new[] { parts[2].ParseLongDecimalOrHex().ToString() }; // Write the variable value
+                }
 
                 parameterTokens = new ParameterToken[parts.Length];
 
@@ -197,7 +223,7 @@ namespace AocIntComputer.Compiler {
                 parameterTokens = new ParameterToken[parts.Length - 1];
 
                 for (int i = 1; i < parts.Length; i++) {
-                    parameterTokens[i - 1] = new ParameterToken(Parameter.Parse(parts[i]));
+                    parameterTokens[i - 1] = new ParameterToken(Parameter.Parse(parts[i], variables));
                 }
             }
 
@@ -233,6 +259,7 @@ namespace AocIntComputer.Compiler {
             string[] lines = _program.Split('\n');
 
             LongWriter longWriter = new LongWriter();
+            IDictionary<string, long> variables = new Dictionary<string, long>();
 
             for (int i = 0; i < lines.Length; i++) {
                 string line = lines[i].Trim();
@@ -247,7 +274,7 @@ namespace AocIntComputer.Compiler {
                     continue;
                 }
 
-                longWriter.Write(Statement.Parse(line).Compile());
+                longWriter.Write(Statement.Parse(line, longWriter.Length, variables).Compile());
             }
 
             return longWriter.ToArray();
