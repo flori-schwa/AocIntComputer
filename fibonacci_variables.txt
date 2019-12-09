@@ -6,11 +6,11 @@ JMPT $1 $0xA            # Jump to start
 
 # Variables
 
-var a 0
+var a
 var b 1
-var result -1
-var tmp -1
-var control -1
+var result
+var tmp
+var control
 
 # Loop start
 

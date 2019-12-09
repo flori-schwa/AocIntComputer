@@ -196,7 +196,7 @@ namespace AocIntComputer.Compiler {
                 // Variable declaration:
                 // var name := value
 
-                if (parts.Length == 3 && "var".Equals(parts[0])) {
+                if (parts.Length >= 2 && "var".Equals(parts[0])) {
                     string varName = parts[1];
 
                     if (variables.ContainsKey(varName)) {
@@ -209,7 +209,7 @@ namespace AocIntComputer.Compiler {
 
                     variables[varName] = index; // Store the variable index
 
-                    parts = new[] { parts[2].ParseLongDecimalOrHex().ToString() }; // Write the variable value
+                    parts = new[] { (parts.Length == 3 ? parts[2].ParseLongDecimalOrHex() : default).ToString()}; // Write the variable value
                 }
 
                 parameterTokens = new ParameterToken[parts.Length];
