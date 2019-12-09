@@ -2,7 +2,7 @@
 # It will first ask for a single input, the upper bound of the loop
 
 IN 0                # input max value
-JMPT $1 $0xa        # Jump to start
+JMPT $1 $0xA        # Jump to start
 
 # Variable storage
 
@@ -25,5 +25,5 @@ ADD 6 $0 5          # Store b to a
 ADD 8 $0 6          # Store tmp to b
 
 LT 7 0 8            # Check if result less than max value
-JMPT 8 $0xa         # Loop back to beginning
+JMPT 8 $0xA         # Loop back to beginning
 END
