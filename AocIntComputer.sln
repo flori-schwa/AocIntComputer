@@ -1,0 +1,22 @@
+﻿
+Microsoft Visual Studio Solution File, Format Version 12.00
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "AocIntComputer", "AocIntComputer\AocIntComputer.csproj", "{91A71497-8E2B-463A-A2C6-6145A8649D69}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "Compiler", "Compiler\Compiler.csproj", "{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Any CPU = Debug|Any CPU
+		Release|Any CPU = Release|Any CPU
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{91A71497-8E2B-463A-A2C6-6145A8649D69}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{91A71497-8E2B-463A-A2C6-6145A8649D69}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{91A71497-8E2B-463A-A2C6-6145A8649D69}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{91A71497-8E2B-463A-A2C6-6145A8649D69}.Release|Any CPU.Build.0 = Release|Any CPU
+		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{8DDC729E-8108-4C30-8341-6DB0BAF4EB9C}.Release|Any CPU.Build.0 = Release|Any CPU
+	EndGlobalSection
+EndGlobal
