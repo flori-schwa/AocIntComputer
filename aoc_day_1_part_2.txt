@@ -19,36 +19,36 @@ END
 
 :init_fuel_calc
 
-ADD $0 $0 fuel_this_module					# Initialize with 0
-ADD input $0 tmp							# Store input to tmp
-ADD $0 :back div_three_jump_back			# Set reset pointer
-JMPT $1 :div_tmp_by_three					# Start division
+ADD $0 $0 fuel_this_module                  # Initialize with 0
+ADD input $0 tmp                            # Store input to tmp
+ADD $0 :back div_three_jump_back            # Set reset pointer
+JMPT $1 :div_tmp_by_three                   # Start division
 
 :back
 
 # tmp was just divided by 3
-ADD tmp $-2 tmp								# Subtract 2 from tmp to calculate fuel
-LT tmp $1 control							# if the result is 0 or less
+ADD tmp $-2 tmp                             # Subtract 2 from tmp to calculate fuel
+LT tmp $1 control                           # if the result is 0 or less
 JMPT control :next_input
-ADD tmp fuel_this_module fuel_this_module	# Increase fuel_this_module with the non-zero value
+ADD tmp fuel_this_module fuel_this_module   # Increase fuel_this_module with the non-zero value
 
 :div_tmp_by_three
 ADD tmp $0 div_three_tmp
-ADD $0 $0 div_three_counter					# Initialize with 0
+ADD $0 $0 div_three_counter                 # Initialize with 0
 
 :div_three_loop
 
-LT div_three_tmp $3 control					# If div_three_tmp is less than 3
-JMPT control :end_div_three					# End the loop
+LT div_three_tmp $3 control                 # If div_three_tmp is less than 3
+JMPT control :end_div_three                 # End the loop
 
 #else
 
-ADD div_three_tmp $-3 div_three_tmp			# Subtract 3 from tmp
-ADD div_three_counter $1 div_three_counter	# Increase the counter
-JMPT $1 :div_three_loop						# Loop
+ADD div_three_tmp $-3 div_three_tmp         # Subtract 3 from tmp
+ADD div_three_counter $1 div_three_counter  # Increase the counter
+JMPT $1 :div_three_loop                     # Loop
 
 :end_div_three
-ADD div_three_counter $0 tmp				# Write the result to tmp
+ADD div_three_counter $0 tmp                # Write the result to tmp
 JMPT $1 div_three_jump_back
 
 :next_input
