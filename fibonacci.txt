@@ -1,29 +1,29 @@
 # This program prints the fibonacci sequence
 # It will first ask for a single input, the upper bound of the loop
 
-IN 0                # input max value
-JMPT $1 $0xA        # Jump to start
+IN 0                    # input max value
+JMPT $1 $0xA            # Jump to start
 
-# Variable storage
+# Variables
 
-0                   # a             (ADDR 5)
-1                   # b             (ADDR 6)
--1                  # result        (ADDR 7)
--1                  # tmp storage   (ADDR 8)
--1                  # max           (ADDR 9)
+var a
+var b 1
+var result
+var tmp
+var control
 
 # Loop start
 
-ADD 5 6 7           # Add a + b
-OUT 7               # Output the result
-ADD 7 $0 6          # Set b to the result of a + b
+ADD a b result          # Add a + b
+OUT result              # Output the result
+ADD result $0 b         # Set b to the result of a + b
 
 # Swap a and b
 
-ADD 5 $0 8          # Store a to tmp
-ADD 6 $0 5          # Store b to a
-ADD 8 $0 6          # Store tmp to b
+ADD a $0 tmp            # Store a to tmp
+ADD b $0 a              # Store b to a
+ADD tmp $0 b            # Store tmp to b
 
-LT 7 0 8            # Check if result less than max value
-JMPT 8 $0xA         # Loop back to beginning
+LT result 0 control     # Check if result less than max value
+JMPT control $0xA       # Loop back to beginning
 END
