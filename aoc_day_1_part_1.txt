@@ -1,0 +1,35 @@
+JMPT $1 :start
+
+var total									# total amount of fuel
+var input									# Current input
+var control									# Control variable
+var tmp
+var div_three_counter
+
+:start
+
+IN input									# Read input
+EQ $-1 input control
+JMPF control :init_fuel_calc
+OUT total
+END
+
+:init_fuel_calc
+
+# Initialize division by 3
+ADD input $0 tmp 							# Write input to tmp
+ADD $0 $0 div_three_counter					# Write 0 to the counter
+
+:div_three_loop
+
+LT tmp $3 control							# If tmp is less than 3
+JMPT control :end_div_three					# Jump to subtraction
+ADD tmp $-3 tmp								# Else subtract 3 from tmp
+ADD div_three_counter $1 div_three_counter	# Increment div_three_counter
+JMPT $1 :div_three_loop
+
+:end_div_three
+
+ADD div_three_counter $-2 tmp				# Write the result of (input / 3) + 2 to tmp
+ADD total tmp total							# Add the calculated fuel amount to total
+JMPT $1 :start

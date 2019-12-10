@@ -23,7 +23,7 @@ namespace AocIntComputer.Compiler {
         }
 
         public void EnsureCapacity(int length) {
-            if (_nextPosition + length >= Length) {
+            if (_nextPosition + length > Length) {
                 Grow(_nextPosition + length);
             }
         }

@@ -16,7 +16,7 @@ namespace AocIntComputer.Compiler {
         public static readonly InstructionToken TokenInput = new TokenInput();
         public static readonly InstructionToken TokenOutput = new TokenOutput();
         public static readonly InstructionToken TokenJumpIfTrue = new TokenJumpIfTrue();
-        public static readonly InstructionToken TokenJumpIfFalse = new TokenJumpIfTrue();
+        public static readonly InstructionToken TokenJumpIfFalse = new TokenJumpIfFalse();
         public static readonly InstructionToken TokenLessThan = new TokenLessThan();
         public static readonly InstructionToken TokenEquals = new TokenEquals();
         public static readonly InstructionToken TokenAdjustRelativeBase = new TokenAdjustRelativeBase();
@@ -101,7 +101,14 @@ namespace AocIntComputer.Compiler {
     }
 
     public class Parameter {
-        public static Parameter Parse(string parameter, IDictionary<string, long> variables) {
+        public static Parameter Parse(
+            long index,
+            string parameter,
+            IDictionary<string, long> variables,
+            IDictionary<string, long> knownLabels,
+            IDictionary<int, string> idToLabel,
+            IList<string> unknownLabels,
+            IList<long> unknownLabelUsages) {
             /*
              * Hex prefix '0x'
              *
@@ -110,6 +117,35 @@ namespace AocIntComputer.Compiler {
              * relative mode: R
              * 
              */
+
+            if (parameter.StartsWith(":")) {
+                // Label reference
+                string label = parameter.Substring(1);
+
+                if (knownLabels.ContainsKey(label)) {
+                    // Known label reference
+                    return new Parameter(knownLabels[label], ParameterMode.Immediate);
+                }
+                else {
+                    if (!unknownLabels.Contains(label)) {
+                        // New unknown label
+                        int unknownLabelId = idToLabel.Count > 0 ? idToLabel.Keys.Max() + 1 : 0;
+
+                        unknownLabels.Add(label);
+                        idToLabel[unknownLabelId] = label;
+                        unknownLabelUsages.Add(index);
+
+                        return new Parameter(unknownLabelId, ParameterMode.Immediate);
+                    }
+                    else {
+                        // Existing Unknown label reference
+                        int id = idToLabel.FirstOrDefault(kvp => kvp.Value.Equals(label)).Key;
+                        unknownLabelUsages.Add(index);
+
+                        return new Parameter(id, ParameterMode.Immediate);
+                    }
+                }
+            }
 
             if (variables.ContainsKey(parameter)) {
                 return new Parameter(variables[parameter], ParameterMode.Position);
@@ -176,15 +212,45 @@ namespace AocIntComputer.Compiler {
     }
 
     public class Statement {
+        public static readonly Statement Empty = new Statement(null, new ParameterToken[0]);
+
         private InstructionToken _instruction;
         private ParameterToken[] _parameters;
 
         private static bool IsValidVariableName(string name) {
-            return name.All(c => c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z');
+            return name.All(c => c >= 'a' && c <= 'z' || c >= 'A' && c <= 'Z' || c == '_' || c == '-');
         }
 
-        public static Statement Parse(string line, long index, IDictionary<string, long> variables) {
+        public static Statement Parse(
+            string line, long index,
+            IDictionary<string, long> variables,
+            IDictionary<string, long> knownLabels,
+            IDictionary<int, string> idToLabel,
+            IList<string> unknownLabels,
+            IList<long> unknownLabelUsages
+        ) {
             string[] parts = line.Trim().Split(' ');
+
+            if (parts.Length > 0 && parts[0].StartsWith(":")) {
+                // Label definition
+
+                string label = parts[0].Substring(1);
+
+                if (!IsValidVariableName(label)) {
+                    throw new CompileException($"Illegal label name \"{label}\"");
+                }
+
+                if (knownLabels.ContainsKey(label)) {
+                    throw new CompileException($"Label \"{label}\" already defined");
+                }
+
+                if (unknownLabels.Contains(label)) {
+                    unknownLabels.Remove(label);
+                }
+
+                knownLabels[label] = index;
+                return Empty;
+            }
 
             InstructionToken instructionToken =
                 BaseToken.Instructions.FirstOrDefault(t => t.TokenValue.Equals(parts[0]));
@@ -192,7 +258,7 @@ namespace AocIntComputer.Compiler {
 
             if (instructionToken == null) {
                 // Data line or variable declaration
-                
+
                 // Variable declaration:
                 // var name := value
 
@@ -209,7 +275,9 @@ namespace AocIntComputer.Compiler {
 
                     variables[varName] = index; // Store the variable index
 
-                    parts = new[] { (parts.Length == 3 ? parts[2].ParseLongDecimalOrHex() : default).ToString()}; // Write the variable value
+                    parts = new[] {
+                        (parts.Length == 3 ? parts[2].ParseLongDecimalOrHex() : default).ToString()
+                    }; // Write the variable value
                 }
 
                 parameterTokens = new ParameterToken[parts.Length];
@@ -223,7 +291,15 @@ namespace AocIntComputer.Compiler {
                 parameterTokens = new ParameterToken[parts.Length - 1];
 
                 for (int i = 1; i < parts.Length; i++) {
-                    parameterTokens[i - 1] = new ParameterToken(Parameter.Parse(parts[i], variables));
+                    parameterTokens[i - 1] = new ParameterToken(Parameter.Parse(
+                        index + i,
+                        parts[i],
+                        variables,
+                        knownLabels,
+                        idToLabel,
+                        unknownLabels,
+                        unknownLabelUsages
+                    ));
                 }
             }
 
@@ -261,6 +337,11 @@ namespace AocIntComputer.Compiler {
             LongWriter longWriter = new LongWriter();
             IDictionary<string, long> variables = new Dictionary<string, long>();
 
+            IDictionary<string, long> knownLabels = new Dictionary<string, long>();
+            IDictionary<int, string> idToLabel = new Dictionary<int, string>();
+            IList<string> unknownLabels = new List<string>();
+            IList<long> unknownLabelUsages = new List<long>();
+
             for (int i = 0; i < lines.Length; i++) {
                 string line = lines[i].Trim();
 
@@ -274,10 +355,34 @@ namespace AocIntComputer.Compiler {
                     continue;
                 }
 
-                longWriter.Write(Statement.Parse(line, longWriter.Length, variables).Compile());
+                try {
+                    longWriter.Write(Statement.Parse(
+                        line,
+                        longWriter.Length,
+                        variables,
+                        knownLabels,
+                        idToLabel,
+                        unknownLabels,
+                        unknownLabelUsages
+                    ).Compile());
+                }
+                catch (Exception e) {
+                    Console.WriteLine($"ERROR LINE #{i + 1}: {e.Message}");
+                    throw;
+                }
             }
 
-            return longWriter.ToArray();
+            if (unknownLabels.Count > 0) {
+                throw new CompileException("ERROR: There are still unknown labels left!");
+            }
+
+            long[] program = longWriter.ToArray();
+
+            foreach (long index in unknownLabelUsages) {
+                program[index] = knownLabels[idToLabel[(int) program[index]]];
+            }
+
+            return program;
         }
     }
 }
