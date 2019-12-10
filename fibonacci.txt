@@ -2,7 +2,7 @@
 # It will first ask for a single input, the upper bound of the loop
 
 IN 0                    # input max value
-JMPT $1 $0xA            # Jump to start
+JMPT $1 :start
 
 # Variables
 
@@ -12,7 +12,7 @@ var result
 var tmp
 var control
 
-# Loop start
+:start
 
 ADD a b result          # Add a + b
 OUT result              # Output the result
@@ -25,5 +25,5 @@ ADD b $0 a              # Store b to a
 ADD tmp $0 b            # Store tmp to b
 
 LT result 0 control     # Check if result less than max value
-JMPT control $0xA       # Loop back to beginning
+JMPT control :start       # Loop back to beginning
 END
