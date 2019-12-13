@@ -12,7 +12,7 @@ namespace AocIntComputer.Runtime {
     
     public abstract class BaseIntComputer {
         
-        class IntComputerMemory {
+        public class IntComputerMemory {
             private long[] _mem;
 
             public IntComputerMemory(long[] mem) {
@@ -75,6 +75,8 @@ namespace AocIntComputer.Runtime {
         public bool IsHalted => _halt;
 
         public void Halt() => _halt = true;
+
+        public IntComputerMemory Mem => _mem;
 
         protected long PeekOpCode() => _mem[_pc];
 
